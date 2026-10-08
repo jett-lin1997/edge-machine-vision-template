@@ -1,0 +1,30 @@
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      CONFIG_PATH: ${CONFIG_PATH:-/config/default.yaml}
+    volumes:
+      - ./config:/config:ro
+    ports:
+      - "${API_PORT:-8000}:8000"
+
+volumes:
+  redis_data:
