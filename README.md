@@ -1,4 +1,115 @@
-# Edge Machine Vision Reference Architecture
+# Edge Machine Vision Template
+
+A runnable, vendor-neutral **project scaffold** for industrial Edge Machine Vision systems.
+
+## Runnable Scaffold
+
+This repository now contains an executable reference implementation with:
+
+- Fake Camera
+- Fake Inference Engine
+- canonical domain DTOs
+- pure Decision Engine / State Machine
+- Mock Machine I/O
+- Redis state repository + event publication
+- FastAPI health/state/demo endpoints
+- Docker Compose
+- YAML configuration
+- Recorder interface
+- pytest unit tests
+- GitHub Actions CI
+
+### Quick Start
+
+```bash
+git clone https://github.com/jett-lin1997/edge-machine-vision-template.git
+cd edge-machine-vision-template
+cp .env.example .env
+docker compose up --build
+```
+
+Then verify:
+
+```bash
+curl http://localhost:8000/api/health
+```
+
+Advance the fake inspection one frame at a time:
+
+```bash
+curl -X POST http://localhost:8000/api/demo/step \
+  -H 'Content-Type: application/json' \
+  -d '{"trigger": true}'
+```
+
+Inspect current state:
+
+```bash
+curl http://localhost:8000/api/state
+```
+
+Reset the demo cycle:
+
+```bash
+curl -X POST http://localhost:8000/api/demo/reset
+```
+
+### Local Tests
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r backend/requirements-dev.txt
+pytest -q
+```
+
+The included Decision Engine tests cover PASS, FAIL, and trigger-reset behavior.
+
+### Extension Points
+
+Replace these adapters without rewriting the rest of the system:
+
+| Boundary | Default | Replace with |
+|---|---|---|
+| Acquisition | `FakeCamera` | V4L2 / Basler / Hikrobot / file source |
+| Inference | `FakeInferenceEngine` | YOLO / OBB / OCR / classifier / segmentation |
+| Decision | generic state machine | project-specific inspection rules |
+| Machine I/O | `MockIO` | Modbus RTU/TCP / PLC / digital I/O |
+| State transport | Redis | Redis Streams / NATS / other repository |
+| Recording | `NullRecorder` interface | video / snapshot / evidence recorder |
+
+See [docs/EXTENDING.md](docs/EXTENDING.md) before integrating production hardware.
+
+### Current Repository Structure
+
+```text
+.
+├── .github/workflows/ci.yml
+├── config/default.yaml
+├── backend/
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   ├── requirements-dev.txt
+│   └── vision_app/
+│       ├── acquisition/
+│       ├── inference/
+│       ├── decision/
+│       ├── io/
+│       ├── recording/
+│       ├── repositories/
+│       ├── services/
+│       ├── api.py
+│       ├── config.py
+│       └── domain.py
+├── frontend/README.md
+├── models/README.md
+├── tests/unit/
+├── docker-compose.yml
+├── Makefile
+└── pytest.ini
+```
+
+---
 
 A reusable, vendor-neutral reference architecture for industrial **Edge Machine Vision** systems.
 
