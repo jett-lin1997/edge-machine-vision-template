@@ -1,0 +1,17 @@
+project:
+  name: edge-machine-vision-template
+
+camera:
+  id: demo
+  width: 640
+  height: 480
+
+inference:
+  reject_every_n_frames: 0
+
+decision:
+  target_class: target
+  reject_class: reject
+  ready_consecutive_frames: 3
+  window_frames: 5
+  reject_threshold: 2
